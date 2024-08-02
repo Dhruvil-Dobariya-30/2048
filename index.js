@@ -2,62 +2,34 @@ let div = document.getElementById("container");
 let mainArray = [];
 let allPlace = [];
 let size = 4;
-let copyArr = [];
 
 document.onkeydown = (e) => {
   e = e || window.event;
-  let arrowPressed = false;
+  movementOccurred = false;
 
   if (e.key === "ArrowUp") {
-    copyArr = structuredClone(mainArray);
-
-    arrowPressed = true;
     topShift();
     topSum();
-    // genarateIndex();
   } else if (e.key === "ArrowDown") {
-    copyArr = structuredClone(mainArray);
-
-    arrowPressed = true;
     downShift();
     downSum();
-    // genarateIndex();
   } else if (e.key === "ArrowLeft") {
-    copyArr = structuredClone(mainArray);
-
-    arrowPressed = true;
     leftShift();
     leftSum();
-    // genarateIndex();
   } else if (e.key === "ArrowRight") {
-    copyArr = structuredClone(mainArray);
-
-    arrowPressed = true;
-    righShift();
+    rightShift();
     rightSum();
-    // genarateIndex();
   }
-  console.log(mainArray);
-  console.log(copyArr);
 
-  checkChanges();
-
-  // if (arrowPressed) {
-  //   genarateIndex();
-  // }
+  if (checkWinningCondition()) {
+    document.getElementById("msg").innerHTML = "You Won!!!";
+    document.onkeydown = null;
+  } else {
+    if (movementOccurred) {
+      genarateIndex();
+    }
+  }
 };
-
-let abc = false;
-function checkChanges() {
-  mainArray.map((item) => {
-    copyArr.map((value, index, array) => {
-      for (let i = 0; i < size; i++) {
-        let check = item.includes(value[i]);
-        console.log(check);
-      }
-    });
-  });
-}
 
 function displayBox() {
   let div = "";
@@ -81,24 +53,22 @@ function generateTwoNums() {
 }
 
 function genarateIndex() {
-  // let randomRow = Math.floor(Math.random() * size);
-  // let randomCol = Math.floor(Math.random() * size);
+  let randomRow = Math.floor(Math.random() * size);
+  let randomCol = Math.floor(Math.random() * size);
 
-  // try {
-  //   let position = `${randomRow}${randomCol}`;
+  try {
+    let position = `${randomRow}${randomCol}`;
 
-  //   if (!allPlace.includes(position)) {
-  //     allPlace.push(position);
-  //     genarateNumber(randomRow, randomCol);
-  //   } else {
-  //     genarateIndex();
-  //   }
-  // } catch (err) {
-  //   // alert("GAME OVER!!!");
-
-  //   document.getElementById("msg").innerHTML = "GAME OVER!!!";
-  // }
-  console.log("hello");
+    if (!allPlace.includes(position)) {
+      allPlace.push(position);
+      genarateNumber(randomRow, randomCol);
+    } else {
+      genarateIndex();
+    }
+  } catch (err) {
+    // alert("GAME OVER!!!");
+    document.getElementById("msg").innerHTML = "GAME OVER!!!";
+  }
 }
 
 function genarateNumber(row, col) {
@@ -115,6 +85,7 @@ function genarateNumber(row, col) {
 
   if (allPlace.length >= size * size) {
     console.log("No more empty positions");
+    alert("GAME OVER!!!");
     return;
   }
 }
@@ -122,8 +93,10 @@ function genarateNumber(row, col) {
 function rightSum() {
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
-      righShift();
+      rightShift();
       if (mainArray[i][j] === mainArray[i][j + 1]) {
+        document.getElementById(`${i}${j + 1}`).classList.add("move-right");
+
         mainArray[i][j + 1] = mainArray[i][j] + mainArray[i][j + 1];
         mainArray[i][j] = `${i}${j}`;
 
@@ -171,8 +144,7 @@ function downSum() {
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
       if (i < size - 1 && mainArray[i][j] === mainArray[i + 1][j]) {
-        mainArray[i + 1][j] =
-          parseInt(mainArray[i][j]) + parseInt(mainArray[i + 1][j]);
+        mainArray[i + 1][j] = mainArray[i][j] + mainArray[i + 1][j];
         mainArray[i][j] = `${i}${j}`;
 
         document.getElementById(`${i + 1}${j}`).innerHTML = mainArray[i + 1][j];
@@ -183,11 +155,12 @@ function downSum() {
   }
 }
 
-function righShift() {
+function rightShift() {
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
       if (mainArray[i][j] !== `${i}${j}`) {
         if (i < size && mainArray[i][j + 1] == `${i}${j + 1}`) {
+          document.getElementById(`${i}${j + 1}`).classList.add("move-right");
           mainArray[i][j + 1] = mainArray[i][j];
           mainArray[i][j] = `${i}${j}`;
           document.getElementById(`${i}${j + 1}`).innerHTML =
@@ -195,6 +168,7 @@ function righShift() {
           document.getElementById(`${i}${j}`).innerHTML = "";
           allPlace.push(`${i}${j + 1}`);
           allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          movementOccurred = true;
         }
       }
     }
@@ -216,6 +190,7 @@ function leftShift() {
 
           allPlace.push(`${i}${j - 1}`);
           allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          movementOccurred = true;
         }
       }
     }
@@ -237,6 +212,7 @@ function topShift() {
 
           allPlace.push(`${i - 1}${j}`);
           allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          movementOccurred = true;
         }
       }
     }
@@ -258,10 +234,22 @@ function downShift() {
 
           allPlace.push(`${i + 1}${j}`);
           allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          movementOccurred = true;
         }
       }
     }
   }
+}
+
+function checkWinningCondition() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] === 2048) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function restart() {
