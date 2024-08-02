@@ -6,23 +6,30 @@ document.onkeydown = (e) => {
   let arrowPressed = false;
 
   if (e.key === "ArrowUp") {
-    console.log("up arrow pressed");
     arrowPressed = true;
+    topShift();
+    topSum();
+    genarateIndex();
   } else if (e.key === "ArrowDown") {
-    console.log("down arrow pressed");
     arrowPressed = true;
+    downShift();
+    downSum();
+    genarateIndex();
   } else if (e.key === "ArrowLeft") {
-    console.log("left arrow pressed");
     arrowPressed = true;
+    leftShift();
+    leftSum();
+    genarateIndex();
   } else if (e.key === "ArrowRight") {
-    console.log("right arrow pressed");
     arrowPressed = true;
-    rightMove();
-  }
-
-  if (arrowPressed) {
+    righShift();
+    rightSum();
     genarateIndex();
   }
+
+  // if (arrowPressed) {
+  //   genarateIndex();
+  // }
 };
 
 let mainArray = [];
@@ -62,6 +69,7 @@ function genarateIndex() {
   } else {
     genarateIndex();
   }
+  console.log(allPlace);
 }
 
 function genarateNumber(row, col) {
@@ -82,4 +90,156 @@ function genarateNumber(row, col) {
   }
 }
 
-function rightMove() {}
+function rightSum() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      righShift();
+      // if (mainArray[i][j] === 2 || mainArray[i][j] == 4) {
+      if (mainArray[i][j] == mainArray[i][j + 1]) {
+        mainArray[i][j + 1] = mainArray[i][j] + mainArray[i][j + 1];
+        mainArray[i][j] = `${i}${j}`;
+
+        document.getElementById(`${i}${j + 1}`).innerHTML = mainArray[i][j + 1];
+        document.getElementById(mainArray[i][j]).innerHTML = "";
+        allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+      }
+    }
+  }
+}
+// }
+
+function leftSum() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      leftShift();
+      // if (mainArray[i][j] === 2 || mainArray[i][j] == 4) {
+      if (mainArray[i][j] == mainArray[i][j - 1]) {
+        mainArray[i][j - 1] = mainArray[i][j] + mainArray[i][j - 1];
+        mainArray[i][j] = `${i}${j}`;
+
+        document.getElementById(`${i}${j - 1}`).innerHTML = mainArray[i][j - 1];
+        document.getElementById(mainArray[i][j]).innerHTML = "";
+        allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+      }
+    }
+  }
+}
+// }
+
+function topSum() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      topShift();
+      // if (mainArray[i][j] === 2 || mainArray[i][j] == 4) {
+      if (i > 0 && mainArray[i][j] == mainArray[i - 1][j]) {
+        mainArray[i - 1][j] = mainArray[i][j] + mainArray[i - 1][j];
+        mainArray[i][j] = `${i}${j}`;
+
+        document.getElementById(`${i - 1}${j}`).innerHTML = mainArray[i - 1][j];
+        document.getElementById(mainArray[i][j]).innerHTML = "";
+        allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+      }
+    }
+  }
+}
+
+function downSum() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      downShift();
+      if (i < 4 && i >= 0 && mainArray[i][j] == mainArray[i + 1][j]) {
+        mainArray[i + 1][j] = mainArray[i][j] + mainArray[i + 1][j];
+        mainArray[i][j] = `${i}${j}`;
+
+        document.getElementById(`${i + 1}${j}`).innerHTML = mainArray[i + 1][j];
+        document.getElementById(mainArray[i][j]).innerHTML = "";
+        allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+      }
+    }
+  }
+}
+
+function righShift() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (i <= size && mainArray[i][j + 1] == `${i}${j + 1}`) {
+          mainArray[i][j + 1] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+          console.log(mainArray);
+
+          document.getElementById(`${i}${j + 1}`).innerHTML =
+            mainArray[i][j + 1];
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+
+          allPlace.push(`${i}${j + 1}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+        }
+      }
+    }
+  }
+}
+
+function leftShift() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (i >= 0 && mainArray[i][j - 1] == `${i}${j - 1}`) {
+          mainArray[i][j - 1] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+
+          document.getElementById(`${i}${j - 1}`).innerHTML =
+            mainArray[i][j - 1];
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+
+          allPlace.push(`${i}${j - 1}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+        }
+      }
+    }
+  }
+}
+
+function topShift() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (i > 0 && mainArray[i - 1][j] == `${i - 1}${j}`) {
+          mainArray[i - 1][j] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+
+          document.getElementById(`${i - 1}${j}`).innerHTML =
+            mainArray[i - 1][j];
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+
+          allPlace.push(`${i - 1}${j}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+        }
+      }
+    }
+  }
+}
+
+function downShift() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (mainArray[i + 1][j] == `${i + 1}${j}`) {
+          mainArray[i + 1][j] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+
+          document.getElementById(`${i + 1}${j}`).innerHTML =
+            mainArray[i + 1][j];
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+
+          allPlace.push(`${i + 1}${j}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+        }
+      }
+    }
+  }
+}
