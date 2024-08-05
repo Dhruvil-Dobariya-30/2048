@@ -2,31 +2,32 @@ let div = document.getElementById("container");
 let mainArray = [];
 let allPlace = [];
 let size = 4;
+let score = 0;
 
 document.onkeydown = (e) => {
   e = e || window.event;
-  movementOccurred = false;
+  isChange = false;
 
   if (e.key === "ArrowUp") {
-    topShift();
+    topMove();
     topSum();
   } else if (e.key === "ArrowDown") {
-    downShift();
+    downMove();
     downSum();
   } else if (e.key === "ArrowLeft") {
-    leftShift();
+    leftMove();
     leftSum();
   } else if (e.key === "ArrowRight") {
-    rightShift();
+    rightMove();
     rightSum();
   }
 
-  if (checkWinningCondition()) {
+  if (checkWin()) {
     document.getElementById("msg").innerHTML = "You Won!!!";
     document.onkeydown = null;
   } else {
-    if (movementOccurred) {
-      genarateIndex();
+    if (isChange) {
+      generateIndex();
     }
   }
 };
@@ -41,18 +42,17 @@ function displayBox() {
       div += `<div class="box" id="${mainArray[i][j]}"></div>`;
     }
   }
-
   document.getElementById("container").innerHTML = div;
-  generateTwoNums();
+  generateTwoNum();
 }
 displayBox();
 
-function generateTwoNums() {
-  genarateIndex();
-  genarateIndex();
+function generateTwoNum() {
+  generateIndex();
+  generateIndex();
 }
 
-function genarateIndex() {
+function generateIndex() {
   let randomRow = Math.floor(Math.random() * size);
   let randomCol = Math.floor(Math.random() * size);
 
@@ -61,17 +61,18 @@ function genarateIndex() {
 
     if (!allPlace.includes(position)) {
       allPlace.push(position);
-      genarateNumber(randomRow, randomCol);
+      generateNumber(randomRow, randomCol);
     } else {
-      genarateIndex();
+      generateIndex();
     }
   } catch (err) {
+    console.log(err);
     // alert("GAME OVER!!!");
-    document.getElementById("msg").innerHTML = "GAME OVER!!!";
+    // document.getElementById("msg").innerHTML = "GAME OVER!!!";
   }
 }
 
-function genarateNumber(row, col) {
+function generateNumber(row, col) {
   let number;
   let num = Math.random().toFixed(3) * 1000;
   if (num % 2 === 0) {
@@ -81,28 +82,84 @@ function genarateNumber(row, col) {
   }
 
   document.getElementById(mainArray[row][col]).innerHTML = number;
+  document.getElementById(mainArray[row][col]).classList.add("change");
+
   mainArray[row][col] = number;
 
-  if (allPlace.length >= size * size) {
-    console.log("No more empty positions");
-    alert("GAME OVER!!!");
+  if (allPlace.length >= 16) {
+    document.getElementById("msg").innerHTML = "GAME OVER!!!";
+    document.onkeydown = null;
     return;
+  }
+}
+
+function rightMove() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (i < size && mainArray[i][j + 1] == `${i}${j + 1}`) {
+          mainArray[i][j + 1] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+
+          document.getElementById(`${i}${j + 1}`).innerHTML =
+            mainArray[i][j + 1];
+          document.getElementById(`${i}${j + 1}`).classList.add("change");
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+          document.getElementById(`${i}${j}`).classList.remove("change");
+
+          allPlace.push(`${i}${j + 1}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          isChange = true;
+        }
+      }
+    }
   }
 }
 
 function rightSum() {
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
-      rightShift();
+      rightMove();
       if (mainArray[i][j] === mainArray[i][j + 1]) {
-        document.getElementById(`${i}${j + 1}`).classList.add("move-right");
-
         mainArray[i][j + 1] = mainArray[i][j] + mainArray[i][j + 1];
         mainArray[i][j] = `${i}${j}`;
 
         document.getElementById(`${i}${j + 1}`).innerHTML = mainArray[i][j + 1];
+        document.getElementById(`${i}${j + 1}`).classList.add("change");
+
         document.getElementById(mainArray[i][j]).innerHTML = "";
+        document.getElementById(`${i}${j}`).classList.remove("change");
+
+        document.querySelector(".score").innerHTML = `Score : ${(score +=
+          mainArray[i][j + 1])}`;
         allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+        isChange = true;
+        checkHighScore();
+      }
+    }
+  }
+}
+
+function leftMove() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (i >= 0 && mainArray[i][j - 1] == `${i}${j - 1}`) {
+          mainArray[i][j - 1] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+
+          document.getElementById(`${i}${j - 1}`).innerHTML =
+            mainArray[i][j - 1];
+          document.getElementById(`${i}${j - 1}`).classList.add("change");
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+          document.getElementById(`${i}${j}`).classList.remove("change");
+
+          allPlace.push(`${i}${j - 1}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          isChange = true;
+        }
       }
     }
   }
@@ -111,14 +168,46 @@ function rightSum() {
 function leftSum() {
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
-      leftShift();
+      leftMove();
       if (mainArray[i][j] === mainArray[i][j - 1]) {
         mainArray[i][j - 1] = mainArray[i][j] + mainArray[i][j - 1];
         mainArray[i][j] = `${i}${j}`;
 
         document.getElementById(`${i}${j - 1}`).innerHTML = mainArray[i][j - 1];
+        document.getElementById(`${i}${j - 1}`).classList.add("change");
+
         document.getElementById(mainArray[i][j]).innerHTML = "";
+        document.getElementById(`${i}${j}`).classList.remove("change");
+
+        document.querySelector(".score").innerHTML = `Score : ${(score +=
+          mainArray[i][j - 1])}`;
         allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+        isChange = true;
+        checkHighScore();
+      }
+    }
+  }
+}
+
+function topMove() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (i > 0 && mainArray[i - 1][j] == `${i - 1}${j}`) {
+          mainArray[i - 1][j] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+
+          document.getElementById(`${i - 1}${j}`).innerHTML =
+            mainArray[i - 1][j];
+          document.getElementById(`${i - 1}${j}`).classList.add("change");
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+          document.getElementById(`${i}${j}`).classList.remove("change");
+
+          allPlace.push(`${i - 1}${j}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          isChange = true;
+        }
       }
     }
   }
@@ -127,14 +216,46 @@ function leftSum() {
 function topSum() {
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
-      topShift();
+      topMove();
       if (i > 0 && mainArray[i][j] === mainArray[i - 1][j]) {
         mainArray[i - 1][j] = mainArray[i][j] + mainArray[i - 1][j];
         mainArray[i][j] = `${i}${j}`;
 
         document.getElementById(`${i - 1}${j}`).innerHTML = mainArray[i - 1][j];
+        document.getElementById(`${i - 1}${j}`).classList.add("change");
+
         document.getElementById(mainArray[i][j]).innerHTML = "";
+        document.getElementById(`${i}${j}`).classList.remove("change");
+
+        document.querySelector(".score").innerHTML = `Score : ${(score +=
+          mainArray[i - 1][j])}`;
         allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+        isChange = true;
+        checkHighScore();
+      }
+    }
+  }
+}
+
+function downMove() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (mainArray[i][j] !== `${i}${j}`) {
+        if (i < size - 1 && mainArray[i + 1][j] == `${i + 1}${j}`) {
+          mainArray[i + 1][j] = mainArray[i][j];
+          mainArray[i][j] = `${i}${j}`;
+
+          document.getElementById(`${i + 1}${j}`).innerHTML =
+            mainArray[i + 1][j];
+          document.getElementById(`${i + 1}${j}`).classList.add("change");
+
+          document.getElementById(`${i}${j}`).innerHTML = "";
+          document.getElementById(`${i}${j}`).classList.remove("change");
+
+          allPlace.push(`${i + 1}${j}`);
+          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
+          isChange = true;
+        }
       }
     }
   }
@@ -148,100 +269,32 @@ function downSum() {
         mainArray[i][j] = `${i}${j}`;
 
         document.getElementById(`${i + 1}${j}`).innerHTML = mainArray[i + 1][j];
+        document.getElementById(`${i + 1}${j}`).classList.add("change");
+
         document.getElementById(`${i}${j}`).innerHTML = "";
+        document.getElementById(`${i}${j}`).classList.remove("change");
+
+        document.querySelector(".score").innerHTML = `Score : ${(score +=
+          mainArray[i + 1][j])}`;
         allPlace = allPlace.filter((data) => data !== `${i}${j}`);
+        isChange = true;
+        checkHighScore();
       }
     }
   }
 }
 
-function rightShift() {
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      if (mainArray[i][j] !== `${i}${j}`) {
-        if (i < size && mainArray[i][j + 1] == `${i}${j + 1}`) {
-          document.getElementById(`${i}${j + 1}`).classList.add("move-right");
-          mainArray[i][j + 1] = mainArray[i][j];
-          mainArray[i][j] = `${i}${j}`;
-          document.getElementById(`${i}${j + 1}`).innerHTML =
-            mainArray[i][j + 1];
-          document.getElementById(`${i}${j}`).innerHTML = "";
-          allPlace.push(`${i}${j + 1}`);
-          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
-          movementOccurred = true;
-        }
-      }
-    }
+function checkHighScore() {
+  let highScore = localStorage.getItem("highScore") || 0;
+  document.querySelector(".highScore").innerHTML = `High Score : ${highScore}`;
+  if (score > highScore) {
+    localStorage.setItem("highScore", score);
+    document.querySelector(".highScore").innerHTML = `High Score : ${score}`;
   }
 }
+checkHighScore();
 
-function leftShift() {
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      if (mainArray[i][j] !== `${i}${j}`) {
-        if (i >= 0 && mainArray[i][j - 1] == `${i}${j - 1}`) {
-          mainArray[i][j - 1] = mainArray[i][j];
-          mainArray[i][j] = `${i}${j}`;
-
-          document.getElementById(`${i}${j - 1}`).innerHTML =
-            mainArray[i][j - 1];
-
-          document.getElementById(`${i}${j}`).innerHTML = "";
-
-          allPlace.push(`${i}${j - 1}`);
-          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
-          movementOccurred = true;
-        }
-      }
-    }
-  }
-}
-
-function topShift() {
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      if (mainArray[i][j] !== `${i}${j}`) {
-        if (i > 0 && mainArray[i - 1][j] == `${i - 1}${j}`) {
-          mainArray[i - 1][j] = mainArray[i][j];
-          mainArray[i][j] = `${i}${j}`;
-
-          document.getElementById(`${i - 1}${j}`).innerHTML =
-            mainArray[i - 1][j];
-
-          document.getElementById(`${i}${j}`).innerHTML = "";
-
-          allPlace.push(`${i - 1}${j}`);
-          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
-          movementOccurred = true;
-        }
-      }
-    }
-  }
-}
-
-function downShift() {
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      if (mainArray[i][j] !== `${i}${j}`) {
-        if (i < size - 1 && mainArray[i + 1][j] == `${i + 1}${j}`) {
-          mainArray[i + 1][j] = mainArray[i][j];
-          mainArray[i][j] = `${i}${j}`;
-
-          document.getElementById(`${i + 1}${j}`).innerHTML =
-            mainArray[i + 1][j];
-
-          document.getElementById(`${i}${j}`).innerHTML = "";
-
-          allPlace.push(`${i + 1}${j}`);
-          allPlace = allPlace.filter((data) => data !== mainArray[i][j]);
-          movementOccurred = true;
-        }
-      }
-    }
-  }
-}
-
-function checkWinningCondition() {
+function checkWin() {
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size; j++) {
       if (mainArray[i][j] === 2048) {
